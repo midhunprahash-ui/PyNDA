@@ -1,16 +1,9 @@
 import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
+import seaborn as sns
+import matplotlib.pyplot as plt
 
-# Load the dataset
 df = pd.read_csv('suicide_intention_dataset.csv')
 
-# Inspect the data
-print(df.head())
-print(df.info())
-
-# Create a gender column from the one-hot encoded columns
 def get_gender(row):
     if row['gender_male'] == 1:
         return 'Male'
@@ -22,30 +15,45 @@ def get_gender(row):
 
 df['gender'] = df.apply(get_gender, axis=1)
 
+sns.set_style("whitegrid")
 
-# Distribution of Intention Score
-fig_intention = px.histogram(df, x='intention_score', title='Distribution of Intention Score', labels={'intention_score': 'Intention Score'})
-fig_intention.write_json("intention_distribution.json")
+plt.figure(figsize=(10, 6))
+sns.histplot(df['intention_score'], bins=10, kde=True)
+plt.title('Distribution of Intention Score')
+plt.xlabel('Intention Score')
+plt.ylabel('Frequency')
+plt.savefig('seaborn_intention_distribution.png')
+plt.clf()
+
+plt.figure(figsize=(10, 6))
+sns.histplot(df['age'], bins=20, kde=True)
+plt.title('Distribution of Age')
+plt.xlabel('Age')
+plt.ylabel('Frequency')
+plt.savefig('seaborn_age_distribution.png')
+plt.clf()
+
+plt.figure(figsize=(8, 8))
+sns.countplot(y=df['gender'])
+plt.title('Distribution of Gender')
+plt.xlabel('Count')
+plt.ylabel('Gender')
+plt.savefig('seaborn_gender_distribution.png')
+plt.clf()
 
 
-# Distribution of Age
-fig_age = px.histogram(df, x='age', title='Distribution of Age', nbins=20, labels={'age': 'Age'})
-fig_age.write_json("age_distribution.json")
+plt.figure(figsize=(10, 6))
+sns.regplot(x='age', y='intention_score', data=df, scatter_kws={'alpha':0.3}, line_kws={"color": "red"})
+plt.title('Intention Score vs. Age')
+plt.xlabel('Age')
+plt.ylabel('Intention Score')
+plt.savefig('seaborn_intention_vs_age.png')
+plt.clf()
 
-
-# Distribution of Gender
-gender_counts = df['gender'].value_counts().reset_index()
-gender_counts.columns = ['gender', 'count']
-fig_gender = px.pie(gender_counts, values='count', names='gender', title='Distribution of Gender')
-fig_gender.write_json("gender_distribution.json")
-
-# Intention Score vs. Age
-fig_scatter = px.scatter(df, x='age', y='intention_score', title='Intention Score vs. Age',
-                         labels={'age': 'Age', 'intention_score': 'Intention Score'},
-                         trendline='ols', trendline_color_override="red")
-fig_scatter.write_json("intention_vs_age.json")
-
-# Intention score by gender
-fig_box_gender = px.box(df, x='gender', y='intention_score', title='Intention Score by Gender',
-                        labels={'gender': 'Gender', 'intention_score': 'Intention Score'})
-fig_box_gender.write_json("intention_by_gender.json")
+plt.figure(figsize=(10, 6))
+sns.boxplot(x='gender', y='intention_score', data=df)
+plt.title('Intention Score by Gender')
+plt.xlabel('Gender')
+plt.ylabel('Intention Score')
+plt.savefig('seaborn_intention_by_gender.png')
+plt.clf()
